@@ -613,7 +613,7 @@ typedef struct // Band data
 //   Band table
 
 Band band[] = {  ////
-  {   "FM", FM_BAND_TYPE,  FM,  6400, 10800,  7800,10}, //  FM          0  ////
+  {   "FM", FM_BAND_TYPE,  FM,  6400, 10800,  8810,10}, //  FM          0  ////
   {   "LW", LW_BAND_TYPE,  AM,   150,   280,   164, 1}, //  LW          1  ////
   {   "MW", MW_BAND_TYPE,  AM,   522,  1701,   666, 9}, //  MW          2  ////
   {"2220M", LW_BAND_TYPE, LSB,   130,   140,   135, 5}, // Ham          3  ////
@@ -1749,7 +1749,7 @@ void loop() {
     if (currentPRES < 0) currentPRES = lastPreset;
     previousPRES = currentPRES;
     DrawDispl();
-    tft.fillRect(XFreqDispl +6, YFreqDispl + 22 , 228, 32, COLOR_BACKGROUND); ////
+    tft.fillRect(XFreqDispl +6, YFreqDispl + 20 , 228, 34, COLOR_BACKGROUND); ////
     AGCfreqdisp();
     tft.setTextColor(COLOR_BUTTON_TEXT, COLOR_BACKGROUND); ////
     tft.setTextSize(2);
@@ -2570,10 +2570,10 @@ void FreqDispl() {
           Displayfreq =  currentFrequency;
           tft.setTextSize(1);
           tft.setFreeFont(&DSEG7_Classic_Mini_Regular_34);
-          tft.drawString(String(Displayfreq, 0), XFreqDispl + 120, YFreqDispl + 62);
+          tft.drawString(String(Displayfreq, 0), XFreqDispl + 120, YFreqDispl + 61);
           tft.setFreeFont(NULL);  
           tft.setTextSize(2);     
-          tft.drawString("kHz", XFreqDispl + 215, YFreqDispl + 62);
+          tft.drawString("kHz", XFreqDispl + 215, YFreqDispl + 61);
        }
        if ((currentMode == LSB) || (currentMode == USB)) {
             if (currentBFO<=0) {
@@ -2587,10 +2587,10 @@ void FreqDispl() {
           tft.fillRect( XFreqDispl + 6, YFreqDispl + 26 , 228, 45, TFT_BLACK); // Black freq. field
           tft.setTextSize(1);  ////
           tft.setFreeFont(&DSEG7_Classic_Mini_Regular_34);  ////
-          tft.drawString(String(Displayfreq, 0), XFreqDispl + 120, YFreqDispl + 62);
+          tft.drawString(String(Displayfreq, 0), XFreqDispl + 120, YFreqDispl + 61);
           tft.setFreeFont(NULL);  ////
           tft.setTextSize(2);
-          tft.drawString(zeroPad(3,DisplayBFO), XFreqDispl + 215, YFreqDispl + 62);  ////
+          tft.drawString(zeroPad(3,DisplayBFO), XFreqDispl + 215, YFreqDispl + 61);  ////
           tft.drawString("kHz", XFreqDispl + 215, YFreqDispl + 82);
           tft.setTextColor(COLOR_BFO, COLOR_BACKGROUND); ////
           tft.setTextSize(1);  ////
@@ -2602,10 +2602,10 @@ void FreqDispl() {
           Displayfreq =  currentFrequency / 1000;
           tft.setTextSize(1);   ////
           tft.setFreeFont(&DSEG7_Classic_Mini_Regular_34);  ////
-          tft.drawString(String(Displayfreq, 3), XFreqDispl + 120, YFreqDispl + 62);
+          tft.drawString(String(Displayfreq, 3), XFreqDispl + 120, YFreqDispl + 61);
           tft.setFreeFont(NULL);  ////
           tft.setTextSize(2);
-          tft.drawString("MHz", XFreqDispl + 215, YFreqDispl + 62);
+          tft.drawString("MHz", XFreqDispl + 215, YFreqDispl + 61);
        }
        if ((currentMode == LSB) || (currentMode == USB)) {
             if (currentBFO<=0) {
@@ -2622,10 +2622,10 @@ void FreqDispl() {
           sprintf(buffer1,/*"%s.",*/ buffer);
           sprintf(buffer, "%02d",freqDec/10); 
           tft.setFreeFont(&DSEG7_Classic_Mini_Regular_34);  ////
-          tft.drawString(String(buffer1)/*+ String(buffer)*/, XFreqDispl + 120, YFreqDispl + 62);
+          tft.drawString(String(buffer1)/*+ String(buffer)*/, XFreqDispl + 120, YFreqDispl + 61);
           tft.setFreeFont(NULL);  ////
           tft.setTextSize(2);
-          tft.drawString(zeroPad(3,DisplayBFO), XFreqDispl + 215, YFreqDispl + 62);  ////
+          tft.drawString(zeroPad(3,DisplayBFO), XFreqDispl + 215, YFreqDispl + 61);  ////
           tft.drawString("MHz", XFreqDispl + 215, YFreqDispl + 82);
           tft.setTextColor(COLOR_BFO, COLOR_BACKGROUND); ////
           tft.setTextSize(1);  ////
@@ -2637,10 +2637,10 @@ void FreqDispl() {
         Displayfreq =  currentFrequency / 100;
         tft.setTextSize(1);  ////
         tft.setFreeFont(&DSEG7_Classic_Mini_Regular_34);////
-        tft.drawString(String(Displayfreq, 1), XFreqDispl + 120, YFreqDispl + 54);
+        tft.drawString(String(Displayfreq, 1), XFreqDispl + 120, YFreqDispl + 55);
         tft.setFreeFont(NULL);  ////
         tft.setTextSize(2);
-        tft.drawString("MHz", XFreqDispl + 215, YFreqDispl + 54);
+        tft.drawString("MHz", XFreqDispl + 215, YFreqDispl + 55);
       }
     }
   }
@@ -2671,30 +2671,30 @@ void SeekFreq (uint16_t freq)  {
 ////        tft.setTextSize(4);
         tft.setTextSize(1); ////
         tft.setFreeFont(&DSEG7_Classic_Mini_Regular_34);  ////
-        tft.drawString(String(Displayfreq,0), XFreqDispl +120,YFreqDispl +62);
+        tft.drawString(String(Displayfreq,0), XFreqDispl +120,YFreqDispl +61);
         tft.setFreeFont(NULL);  ////
         tft.setTextSize(2);
-        tft.drawString("kHz", XFreqDispl +215,YFreqDispl +62);
+        tft.drawString("kHz", XFreqDispl +215,YFreqDispl +61);
       }
     if (band[bandIdx].bandType == FM_BAND_TYPE){
       Displayfreq =  currentFrequency/100;
 ////      tft.setTextSize(4);
       tft.setTextSize(1); ////
       tft.setFreeFont(&DSEG7_Classic_Mini_Regular_34);  ////
-      tft.drawString(String(Displayfreq,1), XFreqDispl +120,YFreqDispl +54);
+      tft.drawString(String(Displayfreq,1), XFreqDispl +120,YFreqDispl +55);
       tft.setFreeFont(NULL);  ////
       tft.setTextSize(2);
-      tft.drawString("MHz", XFreqDispl +215,YFreqDispl +54);
+      tft.drawString("MHz", XFreqDispl +215,YFreqDispl +55);
     } 
     if (band[bandIdx].bandType == SW_BAND_TYPE){
         Displayfreq =  currentFrequency/1000;
 ////        tft.setTextSize(4);
         tft.setTextSize(1); ////
         tft.setFreeFont(&DSEG7_Classic_Mini_Regular_34);  ////
-        tft.drawString(String(Displayfreq,3), XFreqDispl +120,YFreqDispl +62);
+        tft.drawString(String(Displayfreq,3), XFreqDispl +120,YFreqDispl +61);
         tft.setFreeFont(NULL);  ////
         tft.setTextSize(2);
-        tft.drawString("MHz", XFreqDispl +215,YFreqDispl +62);
+        tft.drawString("MHz", XFreqDispl +215,YFreqDispl +61);
       }
      }    
    }
