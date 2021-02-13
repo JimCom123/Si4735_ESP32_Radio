@@ -228,8 +228,6 @@ char bufferStatioName[40];
 const int ledChannel = 0;
 const int resolution = 1;
 
-int16_t si4735Addr;
-
 //=======================================================   Buttons First and Third Layer   ==========================
 typedef struct // Buttons first layer
 {
@@ -330,7 +328,7 @@ Button bt[] = {       //                                                 | 11 |
   { "STEP"  , 11 , ""      , 2 , Xbut8 , Ybut8  },    
   { "BAND"  ,  1 , ""      , 3 , Xbut9 , Ybut9  },    ////
   { "PRESET", 10 , ""      , 9 , Xbut10, Ybut10 },
-  { "MENU"  ,  7 , "MENU"  , 7 , Xbut11, Ybut11 }
+  { "NEXT"  ,  7 , "PREV"  , 7 , Xbut11, Ybut11 }
 };
 #endif
 
@@ -347,7 +345,7 @@ Button bt[] = {
   { "STEP"  ,  6 , ""      , 8 , Xbut8 , Ybut8  }, //     |----|----|----|     
   { "BAND"  ,  1 , ""      , 1 , Xbut9 , Ybut9  },    ////
   { "PRESET", 10 , ""      , 4 , Xbut10, Ybut10 },
-  { "MENU"  , 11 , "MENU"  ,11 , Xbut11, Ybut11 }
+  { "NEXT"  , 11 , "PREV"  ,11 , Xbut11, Ybut11 }
 };
 #endif
 
@@ -617,7 +615,7 @@ Band band[] = {  ////
   {   "LW", LW_BAND_TYPE,  AM,   150,   280,   164, 1}, //  LW          1  ////
   {   "MW", MW_BAND_TYPE,  AM,   522,  1701,   666, 9}, //  MW          2  ////
   {"2220M", LW_BAND_TYPE, LSB,   130,   140,   135, 5}, // Ham          3  ////
-  { "630M", LW_BAND_TYPE, LSB,   420,   520,   475, 5}, // Ham  630M    4
+  { "630M", SW_BAND_TYPE, LSB,   420,   520,   475, 5}, // Ham  630M    4
   { "160M", SW_BAND_TYPE, LSB,  1800,  1920,  1910, 5}, // Ham  160M    5  ////
   { "120M", SW_BAND_TYPE,  AM,  2300,  2860,  2500, 5}, //      120M    6
   {  "90M", SW_BAND_TYPE,  AM,  3200,  3400,  3250, 5}, //       90M    7  ////
@@ -830,8 +828,7 @@ void setup() {
     tft.setTouch(calData);
   #endif
 
-  tft.fillScreen(COLOR_BACKGROUND); ////
-  digitalWrite(Display_Led, displayon);  ////
+ digitalWrite(Display_Led, displayon);  ////
 
   if (!EEPROM.begin(EEPROM_SIZE))
   {
@@ -861,7 +858,38 @@ void setup() {
 
   si4735.setAudioMuteMcuPin(AUDIO_MUTE);
 
-  si4735Addr = si4735.getDeviceI2CAddress(RESET_PIN);
+  int16_t si4735Addr = si4735.getDeviceI2CAddress(RESET_PIN);
+
+  tft.fillScreen(COLOR_BACKGROUND); ////
+////  delay(500);
+  tft.setCursor(7, 50);
+  tft.setTextSize(2);
+  tft.setTextColor(TFT_YELLOW, COLOR_BACKGROUND); ////
+
+////  Serial.println("     SI4735 Radio");
+////  Serial.println("Version 3.0.8j Feb-12-2021");
+  tft.setCursor(7, 70);
+  tft.println(" Version 3.0.8-JimCom");
+  tft.setCursor(7, 95);
+  tft.println("  Feb-12-2021");
+  tft.setCursor(7, 130);
+////  delay(1000);
+  tft.setTextColor(TFT_GREEN, COLOR_BACKGROUND); ////
+  if ( si4735Addr == 0 ) {
+    tft.print("Si4735 not detected");
+////    Serial.println("Si4735 not detected");
+    while (1);
+  } else {
+    tft.setTextColor(TFT_GREEN, COLOR_BACKGROUND);  ////
+    tft.print("Si473X addr :  ");
+    tft.println(si4735Addr, HEX);
+////    Serial.print("Si473X addr :  ");
+////    Serial.println(si4735Addr, HEX);
+  }
+  
+////  delay(1500);
+  delay(500); ////
+
   if (si4735Addr == 17)
   {
     si4735.setDeviceI2CAddress(0);
@@ -899,6 +927,25 @@ void setup() {
   previousBFO = -1;
   si4735.setVolume(currentVOL);
   previousVOL = currentVOL;
+ 
+////
+////  Serial.println("Firmware Information.");
+////  Serial.print("Part Number (HEX)........: ");
+////  Serial.println(si4735.getFirmwarePN(), HEX);
+////  Serial.print("Firmware Major Revision..: ");
+////  Serial.println(si4735.getFirmwareFWMAJOR());
+////  Serial.print("Firmware Minor Revision..: ");
+////  Serial.println(si4735.getFirmwareFWMINOR());
+////  Serial.print("Patch ID ................: ");
+////  Serial.print(si4735.getFirmwarePATCHH(), HEX);
+////  Serial.println(si4735.getFirmwarePATCHL(), HEX);
+////  Serial.print("Component Major Revision.: ");
+////  Serial.println(si4735.getFirmwareCMPMAJOR());
+////  Serial.print("Component Minor Revision.: ");
+////  Serial.println(si4735.getFirmwareCMPMINOR());
+////  Serial.print("Chip Revision............: ");
+////  Serial.println(si4735.getFirmwareCHIPREV());
+////
 
   BandSet();
   if (currentStep != band[bandIdx].currentStep ) band[bandIdx].currentStep = currentStep;
@@ -2003,13 +2050,12 @@ void encoderButtonCheck()  {
     }
     else {
       if (ssbLoaded) {  // SSB is on
-         currentBFOStep = (currentBFOStep == 100) ? 10 : 100;  ////
-////        if (bfoOn) {
-////          bfoOn = false;
-////        }
-////        else {
-////          bfoOn = true;
-////        }
+        if (bfoOn) {
+          bfoOn = false;
+        }
+        else {
+          bfoOn = true;
+        }
         //if (currentMode == FM) bfoOn = false;
         drawBFO();
         DrawDispl();
@@ -2415,8 +2461,8 @@ void subrstatus() {
     if ( currentMode != FM)  tft.drawString("Freq.    : " + String(currentFrequency, 0) + " kHz", 5, 20);
     else tft.drawString("Freq.    : " + String(currentFrequency / 1, 1) + " MHz", 5, 20); ////
     si4735.getCurrentReceivedSignalQuality();
-    tft.drawString("RSSI     : " + String(si4735.getCurrentRSSI()) + "dBuV  ", 5, 30); // si4735.getCurrentSNR()
-    tft.drawString("SNR      : " + String(si4735.getCurrentSNR()) + "dB  ", 5, 40);
+    tft.drawString("RSSI     : " + String(si4735.getCurrentRSSI()) + "dBuV", 5, 30); // si4735.getCurrentSNR()
+    tft.drawString("SNR      : " + String(si4735.getCurrentSNR()) + "dB", 5, 40);
     if (  currentMode == FM ) {
 ////
 //    tft.drawString("Multipath: " + String(si4735.getCurrentMultipath()) + "%", 5, 97); ////
@@ -2442,40 +2488,7 @@ void subrstatus() {
     uint16_t vsupply = analogRead(ENCODER_SWITCH);
     tft.drawString("Power Supply : " + String(((1.66 / 1850)*vsupply) * 2) + " V.", 5, 180);
 ////    tft.drawString("Power Supply : " + String(vsupply*0.0017582) + " V", 5, 310); //// (3.6*((15k+15k)/15k)))/4096
-
-    tft.setCursor(140, 10);
-    tft.println("Version 3.1.0-JimCom");
-    tft.setCursor(140, 20);
-    tft.println("Feb-14-2021");
-    tft.setCursor(140,30);
-    tft.print("Si473X addr :  ");
-    tft.println(si4735Addr, HEX);
-
-    tft.setCursor(140, 50);
-    tft.println("Firmware Information.");
-    tft.setCursor(140, 60);
-    tft.print("Part Number (HEX)........: ");
-    tft.println(si4735.getFirmwarePN(), HEX);
-    tft.setCursor(140, 70);
-    tft.print("Firmware Major Revision..: ");
-    tft.println(si4735.getFirmwareFWMAJOR());
-    tft.setCursor(140, 80);
-    tft.print("Firmware Minor Revision..: ");
-    tft.println(si4735.getFirmwareFWMINOR());
-    tft.setCursor(140, 90);
-    tft.print("Patch ID ................: ");
-    tft.print(si4735.getFirmwarePATCHH(), HEX);
-    tft.println(si4735.getFirmwarePATCHL(), HEX);
-    tft.setCursor(140, 100);
-    tft.print("Component Major Revision.: ");
-    tft.println(si4735.getFirmwareCMPMAJOR());
-    tft.setCursor(140, 110);
-    tft.print("Component Minor Revision.: ");
-    tft.println(si4735.getFirmwareCMPMINOR());
-    tft.setCursor(140, 120);
-    tft.print("Chip Revision............: ");
-    tft.println(si4735.getFirmwareCHIPREV());
-
+    
     press1 = tft.getTouch(&x, &y);  
   }
   x=y=0;
@@ -2565,47 +2578,39 @@ void FreqDispl() {
       }
      
     } else {
-      if ((band[bandIdx].bandType == MW_BAND_TYPE) || (band[bandIdx].bandType == LW_BAND_TYPE)) {
-       if (currentMode == AM) {
+/*  ////      if (band[bandIdx].bandType == MW_BAND_TYPE || band[bandIdx].bandType == LW_BAND_TYPE) {
+        if (bfoOn) {
+          tft.setTextSize(4);
+          tft.drawString(String(currentBFO), XFreqDispl + 120, YFreqDispl + 61);
+        } else {
           Displayfreq =  currentFrequency;
-          tft.setTextSize(1);
-          tft.setFreeFont(&DSEG7_Classic_Mini_Regular_34);
-          tft.drawString(String(Displayfreq, 0), XFreqDispl + 120, YFreqDispl + 62);
-          tft.setFreeFont(NULL);  
-          tft.setTextSize(2);     
-          tft.drawString("kHz", XFreqDispl + 215, YFreqDispl + 62);
-       }
-       if ((currentMode == LSB) || (currentMode == USB)) {
-            if (currentBFO<=0) {
-               Displayfreq =  (currentFrequency+(-currentBFO/1000));
-               DisplayBFO = -(currentBFO%1000);                                     //0<->BFORange
-            }
-            else {
-               Displayfreq =  ((currentFrequency-1)+(((BFORange - currentBFO)-BFORange)/1000));
-               DisplayBFO =   (BFORange - currentBFO)%1000;
-            }
-          tft.fillRect( XFreqDispl + 6, YFreqDispl + 26 , 228, 45, TFT_BLACK); // Black freq. field
-          tft.setTextSize(1);  ////
-          tft.setFreeFont(&DSEG7_Classic_Mini_Regular_34);  ////
-          tft.drawString(String(Displayfreq, 0), XFreqDispl + 120, YFreqDispl + 62);
-          tft.setFreeFont(NULL);  ////
+          tft.setTextSize(4);
+          tft.drawString(String(Displayfreq, 0), XFreqDispl + 120, YFreqDispl + 61);
           tft.setTextSize(2);
-          tft.drawString(zeroPad(3,DisplayBFO), XFreqDispl + 215, YFreqDispl + 62);  ////
-          tft.drawString("kHz", XFreqDispl + 215, YFreqDispl + 82);
-          tft.setTextColor(COLOR_BFO, COLOR_BACKGROUND); ////
-          tft.setTextSize(1);  ////
-          tft.drawString(String(currentBFO), XFreqDispl + 215, YFreqDispl + 38); ////
-       }
+          tft.drawString("kHz", XFreqDispl + 215, YFreqDispl + 61);
+        }
+      }
+*/ ////
+      if (band[bandIdx].bandType == FM_BAND_TYPE) {
+        Displayfreq =  currentFrequency / 100;
+////        tft.setTextSize(4);
+        tft.setTextSize(1);  ////
+        tft.setFreeFont(&DSEG7_Classic_Mini_Regular_34);////
+        tft.drawString(String(Displayfreq, 1), XFreqDispl + 120, YFreqDispl + 54);
+        tft.setFreeFont(NULL);  ////
+        tft.setTextSize(2);
+        tft.drawString("MHz", XFreqDispl + 215, YFreqDispl + 54);
       }
       else {
        if (currentMode == AM) {
           Displayfreq =  currentFrequency / 1000;
+////          tft.setTextSize(4);
           tft.setTextSize(1);   ////
           tft.setFreeFont(&DSEG7_Classic_Mini_Regular_34);  ////
-          tft.drawString(String(Displayfreq, 3), XFreqDispl + 120, YFreqDispl + 62);
+          tft.drawString(String(Displayfreq, 3), XFreqDispl + 120, YFreqDispl + 61);
           tft.setFreeFont(NULL);  ////
           tft.setTextSize(2);
-          tft.drawString("MHz", XFreqDispl + 215, YFreqDispl + 62);
+          tft.drawString("MHz", XFreqDispl + 215, YFreqDispl + 61);
        }
        if ((currentMode == LSB) || (currentMode == USB)) {
             if (currentBFO<=0) {
@@ -2617,30 +2622,21 @@ void FreqDispl() {
                DisplayBFO =   (BFORange - currentBFO)%1000;
             }
           tft.fillRect( XFreqDispl + 6, YFreqDispl + 26 , 228, 45, TFT_BLACK); // Black freq. field
+////          tft.setTextSize(4);
           tft.setTextSize(1);  ////
           dtostrf(Displayfreq,6,3,buffer);
           sprintf(buffer1,/*"%s.",*/ buffer);
           sprintf(buffer, "%02d",freqDec/10); 
           tft.setFreeFont(&DSEG7_Classic_Mini_Regular_34);  ////
-          tft.drawString(String(buffer1)/*+ String(buffer)*/, XFreqDispl + 120, YFreqDispl + 62);
+          tft.drawString(String(buffer1)/*+ String(buffer)*/, XFreqDispl + 120, YFreqDispl + 61);
           tft.setFreeFont(NULL);  ////
           tft.setTextSize(2);
-          tft.drawString(zeroPad(3,DisplayBFO), XFreqDispl + 215, YFreqDispl + 62);  ////
+          tft.drawString(zeroPad(3,DisplayBFO), XFreqDispl + 215, YFreqDispl + 61);  ////
           tft.drawString("MHz", XFreqDispl + 215, YFreqDispl + 82);
           tft.setTextColor(COLOR_BFO, COLOR_BACKGROUND); ////
           tft.setTextSize(1);  ////
           tft.drawString(String(currentBFO), XFreqDispl + 215, YFreqDispl + 38); ////
        }
-      }
-
-      if (band[bandIdx].bandType == FM_BAND_TYPE) {
-        Displayfreq =  currentFrequency / 100;
-        tft.setTextSize(1);  ////
-        tft.setFreeFont(&DSEG7_Classic_Mini_Regular_34);////
-        tft.drawString(String(Displayfreq, 1), XFreqDispl + 120, YFreqDispl + 54);
-        tft.setFreeFont(NULL);  ////
-        tft.setTextSize(2);
-        tft.drawString("MHz", XFreqDispl + 215, YFreqDispl + 54);
       }
     }
   }
@@ -2671,10 +2667,10 @@ void SeekFreq (uint16_t freq)  {
 ////        tft.setTextSize(4);
         tft.setTextSize(1); ////
         tft.setFreeFont(&DSEG7_Classic_Mini_Regular_34);  ////
-        tft.drawString(String(Displayfreq,0), XFreqDispl +120,YFreqDispl +62);
+        tft.drawString(String(Displayfreq,0), XFreqDispl +120,YFreqDispl +61);
         tft.setFreeFont(NULL);  ////
         tft.setTextSize(2);
-        tft.drawString("kHz", XFreqDispl +215,YFreqDispl +62);
+        tft.drawString("kHz", XFreqDispl +215,YFreqDispl +61);
       }
     if (band[bandIdx].bandType == FM_BAND_TYPE){
       Displayfreq =  currentFrequency/100;
@@ -2691,10 +2687,10 @@ void SeekFreq (uint16_t freq)  {
 ////        tft.setTextSize(4);
         tft.setTextSize(1); ////
         tft.setFreeFont(&DSEG7_Classic_Mini_Regular_34);  ////
-        tft.drawString(String(Displayfreq,3), XFreqDispl +120,YFreqDispl +62);
+        tft.drawString(String(Displayfreq,3), XFreqDispl +120,YFreqDispl +61);
         tft.setFreeFont(NULL);  ////
         tft.setTextSize(2);
-        tft.drawString("MHz", XFreqDispl +215,YFreqDispl +62);
+        tft.drawString("MHz", XFreqDispl +215,YFreqDispl +61);
       }
      }    
    }
