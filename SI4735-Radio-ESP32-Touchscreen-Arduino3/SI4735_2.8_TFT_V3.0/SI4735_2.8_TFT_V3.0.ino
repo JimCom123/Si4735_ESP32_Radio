@@ -802,7 +802,7 @@ void setup() {
   pinMode(BEEPER, OUTPUT);
 ////  Serial.begin(115200);  ////
   DISplay = true;
-  Beep(1, 200);
+  Beep(2, 200);
 
   tft.init();
   #ifdef IhaveVertTFT
@@ -825,8 +825,9 @@ void setup() {
   #endif
   
   #ifdef IhaveHoriTFT
-    // Calibration code for touchscreen : Rotation = 1
-    uint16_t calData[5] = { 355, 3532, 249, 3473, 7 };
+    // Use this calibration code in setup():
+     uint16_t calData[5] = { 387, 3530, 246, 3555, 7 };
+////     uint16_t calData[5] = { 370, 3492, 277, 3472, 7 };
     tft.setTouch(calData);
   #endif
 
@@ -903,7 +904,6 @@ void setup() {
   BandSet();
   if (currentStep != band[bandIdx].currentStep ) band[bandIdx].currentStep = currentStep;
   currentFrequency = previousFrequency = si4735.getFrequency();
-  Beep(2, 200);
   encBut = 600;
   x = y = 0;
   DrawFila();
